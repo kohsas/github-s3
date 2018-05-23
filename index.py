@@ -15,6 +15,7 @@ def handler(event, context):
     githubEvent = headers['X-GitHub-Event']
     id = headers['X-GitHub-Delivery']
     
+    print event
     if sig is None:
         errMsg = 'No X-Hub-Signature found on request'
         return {
@@ -60,7 +61,6 @@ def handler(event, context):
                 'headers': { 'Content-Type': 'text/plain' },
                 'body': errMsg
             }
-
         # HMAC requires the key to be bytes, but data is string
         mac = hmac.new(str(secret), msg=str(event["data"]), digestmod=hashlib.sha1)
 
