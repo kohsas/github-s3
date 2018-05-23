@@ -1,6 +1,6 @@
 import json
 import datetime
-import hmac
+import hmac , hashlib
 import os
 
 '''' acknowledgements
@@ -49,6 +49,10 @@ def handler(event, context):
                 'body': errMsg
             }
         sha_name, signature = header_signature.split('=')
+        print ("header_signature = ", header_signature)
+        print ("sha_name = ", sha_name)
+        print ("signature = ", signature)
+        sha_name = sha_name.strip()
         if sha_name != 'sha1':
             errMsg = 'Only sha1 is supported'
             return {
@@ -58,7 +62,7 @@ def handler(event, context):
             }
 
         # HMAC requires the key to be bytes, but data is string
-        mac = hmac.new(str(secret), msg=event.data, digestmod='sha1')
+        mac = hmac.new(str(secret), msg=str(event["data"]), digestmod=hashlib.sha1)
 
         if not hmac.compare_digest(str(mac.hexdigest()), str(signature)):
             errMsg = 'Invalid signature'
