@@ -13,7 +13,7 @@ class TestHandlerCase(unittest.TestCase):
                 "X-GitHub-Event":" push",
                 "X-Hub-Signature":" sha1=c40279d448a496d073e20ef2686bd26d3e87d5af"
              },
-             "data" : {"t":1}
+             "body" : {"t":1}
             }, None)
         print(result)
         #self.assertEqual(result['statusCode'], 200)

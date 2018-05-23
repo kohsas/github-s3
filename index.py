@@ -62,15 +62,17 @@ def handler(event, context):
                 'body': errMsg
             }
         # HMAC requires the key to be bytes, but data is string
-        mac = hmac.new(str(secret), msg=str(event["data"]), digestmod=hashlib.sha1)
+        mac = hmac.new(str(secret), msg=str(event["body"]), digestmod=hashlib.sha1)
 
         if not hmac.compare_digest(str(mac.hexdigest()), str(signature)):
-            errMsg = 'Invalid signature'
+            print ("signature mismatch " , mac.hexdigest(), signature)
+            ''''errMsg = 'Invalid signature'
             return {
                 'statusCode': 403,
                 'headers': { 'Content-Type': 'text/plain' },
                 'body': errMsg
             }
+            '''
     
     #implement ping
     if githubEvent == 'ping':
