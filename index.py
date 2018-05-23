@@ -15,13 +15,6 @@ def handler(event, context):
     githubEvent = headers['X-GitHub-Event']
     id = headers['X-GitHub-Delivery']
     
-    if type(secret) != "str" :
-        errMsg = 'Must provide a \'GITHUB_WEBHOOK_SECRET\' env variable'
-        return {
-            'statusCode': 401,
-            'headers': { 'Content-Type': 'text/plain' },
-            'body': errMsg
-        }
     if sig is None:
         errMsg = 'No X-Hub-Signature found on request'
         return {
