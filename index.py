@@ -9,7 +9,7 @@ import os
 '''
 
 def handler(event, context):
-    headers = event.headers;
+    headers = event["headers"]
     secret = os.environ['GITHUB_WEBHOOK_SECRET']
     sig = headers['X-Hub-Signature']
     githubEvent = headers['X-GitHub-Event']
