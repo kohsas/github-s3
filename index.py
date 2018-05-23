@@ -15,7 +15,7 @@ def handler(event, context):
     githubEvent = headers['X-GitHub-Event']
     id = headers['X-GitHub-Delivery']
     
-    print event
+    print (event)
     if sig is None:
         errMsg = 'No X-Hub-Signature found on request'
         return {
