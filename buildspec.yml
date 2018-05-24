@@ -5,9 +5,7 @@ phases:
     commands:
 
       # Upgrade AWS CLI to the latest version
-      - pip install --upgrade awscli
-      - pip install PyGithub
-      - pip install boto3
+      - pip install --upgrade awscli PyGithub boto3
 
   pre_build:
     commands:
