@@ -101,7 +101,7 @@ def handler(event, context):
         
     
     data = {
-        'output': 'Hello World',
+        'output': errMsg,
         'timestamp': datetime.datetime.utcnow().isoformat()
     }
     return {'statusCode': 200,
