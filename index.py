@@ -2,14 +2,22 @@ import json
 import datetime
 import hmac , hashlib
 import os
-from github import Github, GithubException
-import base64
+import sys
 import boto3
+import base64
+
+here = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(os.path.join(here, "library"))
+
+from github import Github, GithubException
+
+
 
 '''' acknowledgements
      https://github.com/serverless/examples/blob/master/aws-node-github-webhook-listener/handler.js
      https://github.com/carlos-jenkins/python-github-webhooks/blob/master/webhooks.py
      https://github.com/nytlabs/github-s3-deploy/blob/master/index.js
+     
 '''
 
 def handler(event, context):

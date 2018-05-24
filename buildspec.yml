@@ -6,7 +6,7 @@ phases:
 
       # Upgrade AWS CLI to the latest version
       - pip install --upgrade awscli boto3
-      - pip install -t library/ PyGithub
+      - pip install -t library/ PyGithub 
 
   pre_build:
     commands:
