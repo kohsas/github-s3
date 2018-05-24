@@ -164,8 +164,8 @@ class GitReleaseAsset(github.GithubObject.CompletableGithubObject):
         Update asset metadata.
         :rtype: github.GitReleaseAsset.GitReleaseAsset
         """
-        assert isinstance(name, (str, unicode)), name
-        assert isinstance(label, (str, unicode)), label
+        assert isinstance(name, str), name
+        assert isinstance(label, str), label
         post_parameters = {
             "name": name,
             "label": label

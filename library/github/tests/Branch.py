@@ -29,7 +29,7 @@
 #                                                                              #
 ################################################################################
 
-import Framework
+from . import Framework
 
 
 class Branch(Framework.TestCase):

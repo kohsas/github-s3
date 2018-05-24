@@ -8,7 +8,6 @@ import base64
 
 here = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(here, "library"))
-
 from github import Github, GithubException
 
 

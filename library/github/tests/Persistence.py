@@ -26,7 +26,7 @@
 #                                                                              #
 ################################################################################
 
-import Framework
+from . import Framework
 import github
 
 from io import BytesIO as IO

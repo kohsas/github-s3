@@ -27,7 +27,7 @@
 #                                                                              #
 ################################################################################
 
-import Framework
+from . import Framework
 import github
 
 

@@ -31,7 +31,7 @@
 
 import datetime
 
-import Framework
+from . import Framework
 
 
 class GitTag(Framework.TestCase):

@@ -25,7 +25,7 @@
 #                                                                              #
 ################################################################################
 
-import Framework
+from . import Framework
 
 
 class ExposeAllAttributes(Framework.TestCase):
@@ -134,11 +134,11 @@ class ExposeAllAttributes(Framework.TestCase):
             # userKey,  # Security issue if put as-is in ReplayData
         ])
 
-        for className, attributesMissingInClass in sorted(missingAttributes.iteritems()):
-            for attrName, value in sorted(attributesMissingInClass.iteritems()):
-                print className, attrName, "->", repr(value)
+        for className, attributesMissingInClass in sorted(missingAttributes.items()):
+            for attrName, value in sorted(attributesMissingInClass.items()):
+                print(className, attrName, "->", repr(value))
 
-        self.assertEqual(sum(len(attrs) for attrs in missingAttributes.values()), 0)
+        self.assertEqual(sum(len(attrs) for attrs in list(missingAttributes.values())), 0)
 
     def findMissingAttributes(self, obj):
         if hasattr(obj, "update"):

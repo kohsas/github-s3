@@ -28,7 +28,7 @@
 #                                                                              #
 ################################################################################
 
-import Framework
+from . import Framework
 
 
 class GitRef(Framework.TestCase):

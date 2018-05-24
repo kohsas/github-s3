@@ -32,7 +32,7 @@
 #                                                                              #
 ################################################################################
 
-import httplib
+import http.client
 import json
 import os
 import sys
@@ -88,7 +88,7 @@ class RecordingConnection:  # pragma no cover (Class useful only when recording 
         self.__cnx = self._realConnection(host, port, *args, **kwds)
 
     def request(self, verb, url, input, headers):
-        print verb, url, input, headers,
+        print(verb, url, input, headers, end=' ')
         self.__cnx.request(verb, url, input, headers)
         fixAuthorizationHeader(headers)
         self.__writeLine(self.__protocol)
@@ -103,7 +103,7 @@ class RecordingConnection:  # pragma no cover (Class useful only when recording 
         res = self.__cnx.getresponse()
 
         status = res.status
-        print "=>", status
+        print("=>", status)
         headers = res.getheaders()
         output = res.read()
 
@@ -122,14 +122,14 @@ class RecordingConnection:  # pragma no cover (Class useful only when recording 
 
 
 class RecordingHttpConnection(RecordingConnection):  # pragma no cover (Class useful only when recording new tests, not used during automated tests)
-    _realConnection = httplib.HTTPConnection
+    _realConnection = http.client.HTTPConnection
 
     def __init__(self, file, *args, **kwds):
         RecordingConnection.__init__(self, file, "http", *args, **kwds)
 
 
 class RecordingHttpsConnection(RecordingConnection):  # pragma no cover (Class useful only when recording new tests, not used during automated tests)
-    _realConnection = httplib.HTTPSConnection
+    _realConnection = http.client.HTTPSConnection
 
     def __init__(self, file, *args, **kwds):
         RecordingConnection.__init__(self, file, "https", *args, **kwds)
@@ -152,7 +152,7 @@ class ReplayingConnection:
         self.__testCase.assertEqual(self.__splitUrl(url), self.__splitUrl(readLine(self.__file)))
         self.__testCase.assertEqual(headers, eval(readLine(self.__file)))
         expectedInput = readLine(self.__file)
-        if isinstance(input, (str, unicode)):
+        if isinstance(input, str):
             if input.startswith("{"):
                 self.__testCase.assertEqual(json.loads(input.replace('\n', '').replace('\r', '')), json.loads(expectedInput))
             elif python2:  # @todo Test in all cases, including Python 3.4+

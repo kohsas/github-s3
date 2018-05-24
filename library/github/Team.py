@@ -152,7 +152,7 @@ class Team(github.GithubObject.CompletableGithubObject):
         """
         assert isinstance(member, github.NamedUser.NamedUser), member
         assert role is github.GithubObject.NotSet or isinstance(
-            role, (str, unicode)), role
+            role, str), role
         if role is not github.GithubObject.NotSet:
             assert role in ['member', 'maintainer']
             put_parameters = {
@@ -214,8 +214,8 @@ class Team(github.GithubObject.CompletableGithubObject):
         :param permission: string
         :rtype: None
         """
-        assert isinstance(name, (str, unicode)), name
-        assert permission is github.GithubObject.NotSet or isinstance(permission, (str, unicode)), permission
+        assert isinstance(name, str), name
+        assert permission is github.GithubObject.NotSet or isinstance(permission, str), permission
         post_parameters = {
             "name": name,
         }
@@ -234,7 +234,7 @@ class Team(github.GithubObject.CompletableGithubObject):
         :param role: string
         :rtype: :class:`github.PaginatedList.PaginatedList` of :class:`github.NamedUser.NamedUser`
         """
-        assert role is github.GithubObject.NotSet or isinstance(role, (str, unicode)), role
+        assert role is github.GithubObject.NotSet or isinstance(role, str), role
         url_parameters = dict()
         if role is not github.GithubObject.NotSet:
             assert role in ['member', 'maintainer', 'all']
