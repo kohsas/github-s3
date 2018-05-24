@@ -2,10 +2,14 @@ import json
 import datetime
 import hmac , hashlib
 import os
+from github import Github, GithubException
+import base64
+import boto3
 
 '''' acknowledgements
      https://github.com/serverless/examples/blob/master/aws-node-github-webhook-listener/handler.js
      https://github.com/carlos-jenkins/python-github-webhooks/blob/master/webhooks.py
+     https://github.com/nytlabs/github-s3-deploy/blob/master/index.js
 '''
 
 def handler(event, context):
@@ -14,6 +18,7 @@ def handler(event, context):
     sig = headers['X-Hub-Signature']
     githubEvent = headers['X-GitHub-Event']
     id = headers['X-GitHub-Delivery']
+    s3 = boto3.resource('s3')
     
     print (event)
     if sig is None:
@@ -61,7 +66,7 @@ def handler(event, context):
                 'headers': { 'Content-Type': 'text/plain' },
                 'body': errMsg
             }
-        # HMAC requires the key to be bytes, but data is string
+        # HMAC requires the key to be bytes, but data is string -- FIXME
         ''''
         mac = hmac.new(str(secret), msg=str(event["body"]), digestmod=hashlib.sha1)
         if not hmac.compare_digest(str(mac.hexdigest()), str(signature)):
@@ -82,6 +87,9 @@ def handler(event, context):
                 'headers': { 'Content-Type': 'text/plain' },
                 'body': errMsg
             }
+    if githubEvent == 'push':
+        print("push event detected")
+        
     
     data = {
         'output': 'Hello World',
