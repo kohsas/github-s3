@@ -94,8 +94,10 @@ def handler(event, context):
                 'headers': { 'Content-Type': 'text/plain' },
                 'body': errMsg
             }
+    errMsg = "Significant event not present"
     if githubEvent == 'push':
         print("push event detected")
+        errMsg = "Push event detected"
         
     
     data = {
