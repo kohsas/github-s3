@@ -87,6 +87,7 @@ def handler(event, context):
         '''
     
     #implement ping
+    githubEvent = githubEvent.strip()
     if githubEvent == 'ping':
         errMsg = 'pong'
         return {
