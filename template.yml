@@ -24,9 +24,6 @@ Resources:
     Properties:
       Handler: index.handler
       Runtime: python3.6
-      Environment:
-        Variables:
-          GITHUB_WEBHOOK_SECRET: 'b57b8310826638f653bfc958aaa01b4c1463bbcb'
       Role:
         Fn::ImportValue:
           !Join ['-', [!Ref 'ProjectId', !Ref 'AWS::Region', 'LambdaTrustRole']]

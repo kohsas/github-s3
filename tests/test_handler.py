@@ -15,7 +15,7 @@ class TestHandlerCase(unittest.TestCase):
              },
              "body" : {"repository":{
                              "id":134572202,
-                             "name":"www.sangraha.co.in.deploy"
+                             "name":"www.sangraha.co.in.deploy1"
                              }
              }
             }, None)

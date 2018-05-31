@@ -5,10 +5,60 @@ import os
 import sys
 import boto3
 import base64
+from botocore.exceptions import ClientError
+
+''''
+acknowledgements
+     https://github.com/serverless/examples/blob/master/aws-node-github-webhook-listener/handler.js
+     https://github.com/carlos-jenkins/python-github-webhooks/blob/master/webhooks.py
+     https://github.com/nytlabs/github-s3-deploy/blob/master/index.js
+     https://aws.amazon.com/blogs/compute/sharing-secrets-with-aws-lambda-using-aws-systems-manager-parameter-store/
+'''
+
 
 here = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(here, "library"))
 from github import Github, GithubException
+
+def get_secret():
+    secret_name = "/prod/githubCopy/appConfig"
+    endpoint_url = "https://secretsmanager.us-east-1.amazonaws.com"
+    region_name = "us-east-1"
+    secret = {}
+
+    session = boto3.session.Session()
+    client = session.client(
+        service_name='secretsmanager',
+        region_name=region_name,
+        endpoint_url=endpoint_url
+    )
+
+    try:
+        get_secret_value_response = client.get_secret_value(
+            SecretId=secret_name
+        )
+    except ClientError as e:
+        print ("got error")
+        if e.response['Error']['Code'] == 'ResourceNotFoundException':
+            print("The requested secret " + secret_name + " was not found")
+        elif e.response['Error']['Code'] == 'InvalidRequestException':
+            print("The request was invalid due to:", e)
+        elif e.response['Error']['Code'] == 'InvalidParameterException':
+            print("The request had invalid params:", e)
+        else :
+            print (e)
+    else:
+        print ("Getting secret")
+        # Decrypted secret using the associated KMS CMK
+        # Depending on whether the secret was a string or binary, one of these fields will be populated
+        if 'SecretString' in get_secret_value_response:
+            secret = get_secret_value_response['SecretString']
+        else:
+            binary_secret_data = get_secret_value_response['SecretBinary']
+
+        # Your code goes here.
+    return json.loads(secret)
+
 
 def download_directory(repository, sha, server_path, s3, bucket, basedir):
     contents = repository.get_dir_contents(server_path, ref=sha)
@@ -26,16 +76,10 @@ def download_directory(repository, sha, server_path, s3, bucket, basedir):
                 print('Error processing %s: %s', content.path, exc)
 
 
-'''' 
-acknowledgements
-     https://github.com/serverless/examples/blob/master/aws-node-github-webhook-listener/handler.js
-     https://github.com/carlos-jenkins/python-github-webhooks/blob/master/webhooks.py
-     https://github.com/nytlabs/github-s3-deploy/blob/master/index.js
-'''
+
 
 def handler(event, context):
     headers = event["headers"]
-    secret = os.environ['GITHUB_WEBHOOK_SECRET']
     sig = headers['X-Hub-Signature']
     githubEvent = headers['X-GitHub-Event']
     id = headers['X-GitHub-Delivery']
@@ -45,6 +89,12 @@ def handler(event, context):
             'body': "",
             'timestamp': datetime.datetime.utcnow().isoformat()
         }
+    secret = get_secret()
+    print ("secret = ", secret)
+    if secret is None:
+        plain_ret['body'] = 'Internal Configuration Problems'
+        plain_ret['statusCode'] = 500
+        return plain_ret
 
     if sig is None:
         plain_ret['body'] = 'No X-Hub-Signature found on request'
@@ -94,20 +144,23 @@ def handler(event, context):
         plain_ret['statusCode'] = 200
         return plain_ret
         
+    plain_ret['body']  = 'No processing done as event was not relevant'
     if githubEvent == 'push':
         repository = event['body']['repository']['name']
         print("push event detected for repository=" + repository)
-        s3 = boto3.resource('s3')
-        g = Github("dce0f5d9d3bdc0e6ae5fe8a04340930e31beb5e5")
-        r = g.get_user().get_repo(repository)
-        f_c = r.get_branches()
-        matched_branches = [match for match in f_c if match.name == "master"]
-        download_directory(r,matched_branches[0].commit.sha,"/", s3, "www.sangraha.co.in", "temp")
-        print("Downloaded repository to S3 location")
-        
-        plain_ret['body']  = "Push event processed"
-        plain_ret['statusCode'] = 200
+        try:
+            n = secret[repository]
+            s3 = boto3.resource('s3')
+            g = Github(n['github'])
+            r = g.get_user().get_repo(repository)
+            f_c = r.get_branches()
+            matched_branches = [match for match in f_c if match.name == "master"]
+            download_directory(r,matched_branches[0].commit.sha,"/", s3,n['bucket'], "temp")
+            print("Downloaded repository to S3 location")
+            plain_ret['body']  = "Push event processed"
+            plain_ret['statusCode'] = 200
+        except KeyError as e:
+            plain_ret['body']  = 'push event not processed for this repository'
     
-    plain_ret['body']  = 'No processing done as event was not relevant'
     plain_ret['statusCode'] = 200
     return plain_ret
