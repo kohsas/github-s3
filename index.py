@@ -146,6 +146,7 @@ def handler(event, context):
         
     plain_ret['body']  = 'No processing done as event was not relevant'
     if githubEvent == 'push':
+        print ("data = ", event['body'])
         repository = event['body']['repository']['name']
         print("push event detected for repository=" + repository)
         try:
@@ -155,7 +156,7 @@ def handler(event, context):
             r = g.get_user().get_repo(repository)
             f_c = r.get_branches()
             matched_branches = [match for match in f_c if match.name == "master"]
-            download_directory(r,matched_branches[0].commit.sha,"/", s3,n['bucket'], "temp")
+            #download_directory(r,matched_branches[0].commit.sha,"/", s3,n['bucket'], "temp")
             print("Downloaded repository to S3 location")
             plain_ret['body']  = "Push event processed"
             plain_ret['statusCode'] = 200
