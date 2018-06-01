@@ -20,6 +20,19 @@ here = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(here, "library"))
 from github import Github, GithubException
 
+myGithubConfig = None
+
+class GithubConfig:
+    def __init__(self, config):
+        """
+        Construct new GithubConfig with configuration
+        :param config: application configuration
+        """
+        self.config = config
+
+    def get_config(self):
+        return self.config
+        
 def get_secret():
     secret_name = "/prod/githubCopy/appConfig"
     endpoint_url = "https://secretsmanager.us-east-1.amazonaws.com"
@@ -89,7 +102,14 @@ def handler(event, context):
             'body': "",
             'timestamp': datetime.datetime.utcnow().isoformat()
         }
-    secret = get_secret()
+    global myGithubConfig
+    
+    if myGithubConfig is None :
+        print("Loading config and creating new MyApp...")
+        config = get_secret()
+        myGithubConfig = GithubConfig(config)
+        
+    secret = myGithubConfig.get_config()
     print ("secret = ", secret)
     if secret is None:
         plain_ret['body'] = 'Internal Configuration Problems'
