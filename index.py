@@ -149,7 +149,7 @@ def handler(event, context):
             
         # HMAC requires the key to be bytes, but data is string -- FIXME
         ''''
-        mac = hmac.new(str(secret), msg=str(event["body"]), digestmod=hashlib.sha1)
+        mac = hmac.new(str(secret), msg=str(event["payload"]), digestmod=hashlib.sha1)
         if not hmac.compare_digest(str(mac.hexdigest()), str(signature)):
             print ("signature mismatch " , mac.hexdigest(), signature)
             plain_ret['body']  = 'Invalid signature'
@@ -166,8 +166,8 @@ def handler(event, context):
         
     plain_ret['body']  = 'No processing done as event was not relevant'
     if githubEvent == 'push':
-        print ("data = ", event['body'])
-        repository = event['body']['repository']['name']
+        print ("data = ", event['payload'])
+        repository = event['payload']['repository']['name']
         print("push event detected for repository=" + repository)
         try:
             n = secret[repository]
