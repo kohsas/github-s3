@@ -13,3 +13,6 @@ paths:
         type: aws
         requestTemplates:
           application/json: "$util.base64Encode($input.body)"
+        responses:
+          default:
+          statusCode: "200"
