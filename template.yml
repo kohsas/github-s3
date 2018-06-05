@@ -29,12 +29,14 @@ Resources:
           !Join ['-', [!Ref 'ProjectId', !Ref 'AWS::Region', 'LambdaTrustRole']]
       Timeout: 180
       Events:
-        PostEvent:
+        ApiRoot:
           Type: Api
           Properties:
+            RestApiId: !Ref ScheduleApi
             Path: /
-            Method: post
-            RequestTemplate:
-              "application/json":
-                "payload" : $util.base64Encode($input.body)"  
-            
+            Method: POST
+  ScheduleApi:
+    Type: 'AWS::Serverless::Api'
+    Properties:
+      StageName: prod
+      DefinitionUri: swagger.yml
