@@ -33,11 +33,18 @@ Resources:
           Type: Api
           Properties:
 <<<<<<< HEAD
+<<<<<<< HEAD
             RestApiId: !Ref GitHubWebhookApi
             Path: /
 <<<<<<< HEAD
             Method: ANY
   GitHubWebhookApi:
+=======
+            RestApiId: !Ref ScheduleApi
+            Path: /
+            Method: POST
+  ScheduleApi:
+>>>>>>> parent of 3365c69...  directionaless fix for deply issue
     Type: 'AWS::Serverless::Api'
     Properties:
       StageName: prod
