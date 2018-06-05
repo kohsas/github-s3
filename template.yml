@@ -32,10 +32,10 @@ Resources:
         ApiRoot:
           Type: Api
           Properties:
-            RestApiId: !Ref ScheduleApi
+            RestApiId: !Ref GitHubWebhookApi
             Path: /
-            Method: POST
-  ScheduleApi:
+            Method: ANY
+  GitHubWebhookApi:
     Type: 'AWS::Serverless::Api'
     Properties:
       StageName: prod
