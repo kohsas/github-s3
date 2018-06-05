@@ -29,14 +29,8 @@ Resources:
           !Join ['-', [!Ref 'ProjectId', !Ref 'AWS::Region', 'LambdaTrustRole']]
       Timeout: 180
       Events:
-        ApiRoot:
+        PostEvent:
           Type: Api
           Properties:
-            RestApiId: !Ref GitHubWebhookApi
             Path: /
-            Method: ANY
-  GitHubWebhookApi:
-    Type: 'AWS::Serverless::Api'
-    Properties:
-      StageName: prod
-      DefinitionUri: swagger.yml
+            Method: post
