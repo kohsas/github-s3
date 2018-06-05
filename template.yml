@@ -34,3 +34,7 @@ Resources:
           Properties:
             Path: /
             Method: post
+            RequestTemplate:
+              "application/json":
+                "payload" : $util.base64Encode($input.body)"  
+            
