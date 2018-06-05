@@ -29,9 +29,10 @@ Resources:
           !Join ['-', [!Ref 'ProjectId', !Ref 'AWS::Region', 'LambdaTrustRole']]
       Timeout: 180
       Events:
-        ApiRoot:
+        PostEvent:
           Type: Api
           Properties:
+<<<<<<< HEAD
             RestApiId: !Ref GitHubWebhookApi
             Path: /
 <<<<<<< HEAD
@@ -44,3 +45,11 @@ Resources:
 =======
             Method: post
 >>>>>>> parent of 3d287ca... trying to added request template
+=======
+            Path: /
+            Method: post
+            RequestTemplate:
+              "application/json":
+                "payload" : $util.base64Encode($input.body)"  
+            
+>>>>>>> parent of 598b128...  using swagger template for API def
