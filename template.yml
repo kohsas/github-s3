@@ -34,9 +34,13 @@ Resources:
           Properties:
             RestApiId: !Ref GitHubWebhookApi
             Path: /
+<<<<<<< HEAD
             Method: ANY
   GitHubWebhookApi:
     Type: 'AWS::Serverless::Api'
     Properties:
       StageName: prod
       DefinitionUri: swagger.yml
+=======
+            Method: post
+>>>>>>> parent of 3d287ca... trying to added request template
