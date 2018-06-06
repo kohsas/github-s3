@@ -176,11 +176,14 @@ def handler(event, context):
             
         plain_ret['body']['msg']  = 'No processing done as event was not relevant'
         if githubEvent == 'push':
+            
             body = json.loads(event['body'])
             repository = body['repository']['name']
             print("push event detected for repository=" + repository)
             try:
                 n = secret[repository]
+                mac = hmac.new(n['githubWebhookSecret'], msg=str(event["body"]), digestmod=hashlib.sha1)
+                print("mac=", mac.hexdigest())
                 s3 = boto3.resource('s3')
                 g = Github(n['githubAPIKey'])
                 r = g.get_user().get_repo(repository)
