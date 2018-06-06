@@ -88,7 +88,9 @@ def download_directory(repository, sha, server_path, s3, bucket, basedir):
             except (GithubException, IOError) as exc:
                 print('Error processing %s: %s', content.path, exc)
 
-
+class BreakoutException(Exception):
+   """Base class for other exceptions"""
+   pass
 
 
 def handler(event, context):
@@ -99,7 +101,8 @@ def handler(event, context):
     responseHeaders = {
         'content-type':'application/json',
         'Access-Control-Allow-Origin' : '*',       
-        'Access-Control-Allow-Credentials' : 'true'  
+        'Access-Control-Allow-Credentials' : 'true',
+        "isBase64Encoded": 'false'
     };
     plain_ret = {
             'statusCode': 401,
@@ -110,84 +113,92 @@ def handler(event, context):
         }
     global myGithubConfig
     
-    if myGithubConfig is None :
-        print("Loading config and creating new MyApp...")
-        config = get_secret()
-        myGithubConfig = GithubConfig(config)
-        
-    secret = myGithubConfig.get_config()
-    print ("secret = ", secret)
-    if secret is None:
-        plain_ret['body']['msg'] = 'Internal Configuration Problems'
-        plain_ret['statusCode'] = 500
-        return plain_ret
-
-    if sig is None:
-        plain_ret['body']['msg'] = 'No X-Hub-Signature found on request'
-        return plain_ret
-        
-    if githubEvent is None:
-        plain_ret['body']['msg'] = 'No X-Github-Event found on request'
-        plain_ret['statusCode'] = 422
-        return plain_ret
-        
-    if id is None :
-        plain_ret['body']['msg']  = 'No X-Github-Delivery found on request'
-        return plain_ret
-
-    if secret:
-        # Only SHA1 is supported
-        header_signature = headers['X-Hub-Signature']
-        if header_signature is None:
-            plain_ret['body']['msg']  = 'No X-Hub-Signature found on request'
-            plain_ret['statusCode'] = 403
-            return plain_ret
-            
-        sha_name, signature = header_signature.split('=')
-        print ("header_signature = ", header_signature)
-        print ("sha_name = ", sha_name)
-        print ("signature = ", signature)
-        sha_name = sha_name.strip()
-        if sha_name != 'sha1':
-            plain_ret['body']['msg']  = 'Only sha1 is supported'
-            plain_ret['statusCode'] = 501
-            return plain_ret
-            
-        # HMAC requires the key to be bytes, but data is string -- FIXME
-        ''''
-        mac = hmac.new(str(secret), msg=str(event["payload"]), digestmod=hashlib.sha1)
-        if not hmac.compare_digest(str(mac.hexdigest()), str(signature)):
-            print ("signature mismatch " , mac.hexdigest(), signature)
-            plain_ret['body']['msg']  = 'Invalid signature'
-            plain_ret['statusCode'] = 403
-            return plain_ret
-        '''
+    try :
     
-    #implement ping
-    githubEvent = githubEvent.strip()
-    if githubEvent == 'ping':
-        plain_ret['body']['msg']  = 'pong'
-        plain_ret['statusCode'] = 200
-        return plain_ret
+        if myGithubConfig is None :
+            print("Loading config and creating new MyApp...")
+            config = get_secret()
+            myGithubConfig = GithubConfig(config)
+            
+        secret = myGithubConfig.get_config()
+        print ("secret = ", secret)
+        if secret is None:
+            plain_ret['body']['msg'] = 'Internal Configuration Problems'
+            plain_ret['statusCode'] = 500
+            raise BreakoutException
+    
+        if sig is None:
+            plain_ret['body']['msg'] = 'No X-Hub-Signature found on request'
+            raise BreakoutException
+            
+        if githubEvent is None:
+            plain_ret['body']['msg'] = 'No X-Github-Event found on request'
+            plain_ret['statusCode'] = 422
+            raise BreakoutException
+            
+        if id is None :
+            plain_ret['body']['msg']  = 'No X-Github-Delivery found on request'
+            raise BreakoutException
+    
+        if secret:
+            # Only SHA1 is supported
+            header_signature = headers['X-Hub-Signature']
+            if header_signature is None:
+                plain_ret['body']['msg']  = 'No X-Hub-Signature found on request'
+                plain_ret['statusCode'] = 403
+                raise BreakoutException
+                
+            sha_name, signature = header_signature.split('=')
+            print ("header_signature = ", header_signature)
+            print ("sha_name = ", sha_name)
+            print ("signature = ", signature)
+            sha_name = sha_name.strip()
+            if sha_name != 'sha1':
+                plain_ret['body']['msg']  = 'Only sha1 is supported'
+                plain_ret['statusCode'] = 501
+                raise BreakoutException
+                
+            # HMAC requires the key to be bytes, but data is string -- FIXME
+            ''''
+            mac = hmac.new(str(secret), msg=str(event["payload"]), digestmod=hashlib.sha1)
+            if not hmac.compare_digest(str(mac.hexdigest()), str(signature)):
+                print ("signature mismatch " , mac.hexdigest(), signature)
+                plain_ret['body']['msg']  = 'Invalid signature'
+                plain_ret['statusCode'] = 403
+                raise BreakoutException
+            '''
         
-    plain_ret['body']['msg']  = 'No processing done as event was not relevant'
-    if githubEvent == 'push':
-        body = json.loads(event['body'])
-        repository = body['repository']['name']
-        print("push event detected for repository=" + repository)
-        try:
-            n = secret[repository]
-            s3 = boto3.resource('s3')
-            g = Github(n['github'])
-            r = g.get_user().get_repo(repository)
-            f_c = r.get_branches()
-            matched_branches = [match for match in f_c if match.name == "master"]
-            #download_directory(r,matched_branches[0].commit.sha,"/", s3,n['bucket'], "temp")
-            print("Downloaded repository to S3 location")
-            plain_ret['body']['msg']  = "Push event processed"
+        #implement ping
+        githubEvent = githubEvent.strip()
+        if githubEvent == 'ping':
+            plain_ret['body']['msg']  = 'pong'
             plain_ret['statusCode'] = 200
-        except KeyError as e:
-            plain_ret['body']['msg']  = 'push event not processed for this repository'
+            raise BreakoutException
+            
+        plain_ret['body']['msg']  = 'No processing done as event was not relevant'
+        if githubEvent == 'push':
+            body = json.loads(event['body'])
+            repository = body['repository']['name']
+            print("push event detected for repository=" + repository)
+            try:
+                n = secret[repository]
+                s3 = boto3.resource('s3')
+                g = Github(n['github'])
+                r = g.get_user().get_repo(repository)
+                f_c = r.get_branches()
+                matched_branches = [match for match in f_c if match.name == "master"]
+                #download_directory(r,matched_branches[0].commit.sha,"/", s3,n['bucket'], "temp")
+                print("Downloaded repository to S3 location")
+                plain_ret['body']['msg']  = "Push event processed"
+                plain_ret['statusCode'] = 200
+            except KeyError as e:
+                plain_ret['body']['msg']  = 'push event not processed for this repository'
     
-    plain_ret['statusCode'] = 200
+        plain_ret['statusCode'] = 200
+    
+    except BreakoutException:
+        pass
+    
+    
+    plain_ret['body'] = json.dumps(plain_ret['body'])
     return plain_ret
