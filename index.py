@@ -22,6 +22,10 @@ from github import Github, GithubException
 
 myGithubConfig = None
 
+class BreakoutException(Exception):
+   """Base class for other exceptions"""
+   pass
+   
 class GithubConfig:
     def __init__(self, config):
         """
@@ -88,9 +92,7 @@ def download_directory(repository, sha, server_path, s3, bucket, basedir):
             except (GithubException, IOError) as exc:
                 print('Error processing %s: %s', content.path, exc)
 
-class BreakoutException(Exception):
-   """Base class for other exceptions"""
-   pass
+
 
 
 def handler(event, context):
