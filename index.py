@@ -167,7 +167,7 @@ def handler(event, context):
     plain_ret['body']  = 'No processing done as event was not relevant'
     if githubEvent == 'push':
         print ("data = ", event['body'])
-        repository = event['payload']['repository']['name']
+        repository = event['body']['repository']['name']
         print("push event detected for repository=" + repository)
         try:
             n = secret[repository]
