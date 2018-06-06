@@ -182,7 +182,7 @@ def handler(event, context):
             try:
                 n = secret[repository]
                 s3 = boto3.resource('s3')
-                g = Github(n['github'])
+                g = Github(n['githubAPIKey'])
                 r = g.get_user().get_repo(repository)
                 f_c = r.get_branches()
                 matched_branches = [match for match in f_c if match.name == "master"]
