@@ -96,11 +96,17 @@ def handler(event, context):
     sig = headers['X-Hub-Signature']
     githubEvent = headers['X-GitHub-Event']
     id = headers['X-GitHub-Delivery']
+    responseHeaders = {
+        'content-type':'application/json',
+        'Access-Control-Allow-Origin' : '*',       
+        'Access-Control-Allow-Credentials' : 'true'  
+    };
     plain_ret = {
             'statusCode': 401,
-            'headers': { 'Content-Type': 'text/plain' },
-            'body': "",
-            'timestamp': datetime.datetime.utcnow().isoformat()
+            'headers': responseHeaders,
+            'body': { "msg": "",
+                      "timestamp": datetime.datetime.utcnow().isoformat()
+                      }
         }
     global myGithubConfig
     
@@ -112,28 +118,28 @@ def handler(event, context):
     secret = myGithubConfig.get_config()
     print ("secret = ", secret)
     if secret is None:
-        plain_ret['body'] = 'Internal Configuration Problems'
+        plain_ret['body']['msg'] = 'Internal Configuration Problems'
         plain_ret['statusCode'] = 500
         return plain_ret
 
     if sig is None:
-        plain_ret['body'] = 'No X-Hub-Signature found on request'
+        plain_ret['body']['msg'] = 'No X-Hub-Signature found on request'
         return plain_ret
         
     if githubEvent is None:
-        plain_ret['body'] = 'No X-Github-Event found on request'
+        plain_ret['body']['msg'] = 'No X-Github-Event found on request'
         plain_ret['statusCode'] = 422
         return plain_ret
         
     if id is None :
-        plain_ret['body']  = 'No X-Github-Delivery found on request'
+        plain_ret['body']['msg']  = 'No X-Github-Delivery found on request'
         return plain_ret
 
     if secret:
         # Only SHA1 is supported
         header_signature = headers['X-Hub-Signature']
         if header_signature is None:
-            plain_ret['body']  = 'No X-Hub-Signature found on request'
+            plain_ret['body']['msg']  = 'No X-Hub-Signature found on request'
             plain_ret['statusCode'] = 403
             return plain_ret
             
@@ -143,7 +149,7 @@ def handler(event, context):
         print ("signature = ", signature)
         sha_name = sha_name.strip()
         if sha_name != 'sha1':
-            plain_ret['body']  = 'Only sha1 is supported'
+            plain_ret['body']['msg']  = 'Only sha1 is supported'
             plain_ret['statusCode'] = 501
             return plain_ret
             
@@ -152,7 +158,7 @@ def handler(event, context):
         mac = hmac.new(str(secret), msg=str(event["payload"]), digestmod=hashlib.sha1)
         if not hmac.compare_digest(str(mac.hexdigest()), str(signature)):
             print ("signature mismatch " , mac.hexdigest(), signature)
-            plain_ret['body']  = 'Invalid signature'
+            plain_ret['body']['msg']  = 'Invalid signature'
             plain_ret['statusCode'] = 403
             return plain_ret
         '''
@@ -160,11 +166,11 @@ def handler(event, context):
     #implement ping
     githubEvent = githubEvent.strip()
     if githubEvent == 'ping':
-        plain_ret['body']  = 'pong'
+        plain_ret['body']['msg']  = 'pong'
         plain_ret['statusCode'] = 200
         return plain_ret
         
-    plain_ret['body']  = 'No processing done as event was not relevant'
+    plain_ret['body']['msg']  = 'No processing done as event was not relevant'
     if githubEvent == 'push':
         body = json.loads(event['body'])
         repository = body['repository']['name']
@@ -178,10 +184,10 @@ def handler(event, context):
             matched_branches = [match for match in f_c if match.name == "master"]
             #download_directory(r,matched_branches[0].commit.sha,"/", s3,n['bucket'], "temp")
             print("Downloaded repository to S3 location")
-            plain_ret['body']  = "Push event processed"
+            plain_ret['body']['msg']  = "Push event processed"
             plain_ret['statusCode'] = 200
         except KeyError as e:
-            plain_ret['body']  = 'push event not processed for this repository'
+            plain_ret['body']['msg']  = 'push event not processed for this repository'
     
     plain_ret['statusCode'] = 200
     return plain_ret
