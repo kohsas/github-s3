@@ -92,9 +92,6 @@ def download_directory(repository, sha, server_path, s3, bucket, basedir):
             except (GithubException, IOError) as exc:
                 print('Error processing %s: %s', content.path, exc)
 
-
-
-
 def handler(event, context):
     headers = event["headers"]
     sig = headers['X-Hub-Signature']
@@ -189,7 +186,7 @@ def handler(event, context):
                 r = g.get_user().get_repo(repository)
                 f_c = r.get_branches()
                 matched_branches = [match for match in f_c if match.name == "master"]
-                #download_directory(r,matched_branches[0].commit.sha,"/", s3,n['bucket'], "temp")
+                download_directory(r,matched_branches[0].commit.sha,"/", s3,n['bucket'], n['bucketDir'])
                 print("Downloaded repository to S3 location")
                 plain_ret['body']['msg']  = "Push event processed"
                 plain_ret['statusCode'] = 200
