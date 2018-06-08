@@ -182,7 +182,11 @@ def handler(event, context):
             print("push event detected for repository=" + repository)
             try:
                 n = secret[repository]
-                mac = hmac.new(n['githubWebhookSecret'], msg=str(event["body"]), digestmod=hashlib.sha1)
+                secretAsbytearray = bytearray()
+                secretAsbytearray.extend(map(ord,n['githubWebhookSecret']))
+                bodyAsbytearray = bytearray()
+                bodyAsbytearray.extend(map(ord,str(event["body"])))
+                mac = hmac.new(secretAsbytearray, msg=bodyAsbytearray, digestmod=hashlib.sha1)
                 print("mac=", mac.hexdigest())
                 s3 = boto3.resource('s3')
                 g = Github(n['githubAPIKey'])
