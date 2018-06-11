@@ -176,7 +176,7 @@ def handler(event, context):
             
         plain_ret['body']['msg']  = 'No processing done as event was not relevant'
         if githubEvent == 'push':
-            
+            print (event['body'])
             body = json.loads(event['body'])
             repository = body['repository']['name']
             print("push event detected for repository=" + repository)
