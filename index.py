@@ -55,7 +55,7 @@ def get_secret():
             SecretId=secret_name
         )
     except ClientError as e:
-        print ("got error")
+        print ("got error while reading secret")
         if e.response['Error']['Code'] == 'ResourceNotFoundException':
             print("The requested secret " + secret_name + " was not found")
         elif e.response['Error']['Code'] == 'InvalidRequestException':
