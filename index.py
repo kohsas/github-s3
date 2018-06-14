@@ -187,7 +187,7 @@ def handler(event, context):
                 bodyAsbytearray = bytearray()
                 bodyAsbytearray.extend(map(ord,str(event["body"])))
                 mac = hmac.new(secretAsbytearray, msg=bodyAsbytearray, digestmod=hashlib.sha1)
-                print("mac=", mac.hexdigest())
+                print("calculated mac=", mac.hexdigest())
                 s3 = boto3.resource('s3')
                 g = Github(n['githubAPIKey'])
                 r = g.get_user().get_repo(repository)
